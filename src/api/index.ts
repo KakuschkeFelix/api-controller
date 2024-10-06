@@ -13,6 +13,7 @@ type APIConfig = {
         route: Hono;
         auth: 'API_KEY' | 'JWT' | 'NONE';
     }[];
+    adminPrefix: string;
     adminSecret: string;
     adminRoutes?: {
         path: string;
@@ -20,7 +21,6 @@ type APIConfig = {
     }[];
 }
 
-const adminPath = '/admin';
 
 export class API {
     private app: Hono;
@@ -34,18 +34,18 @@ export class API {
     }
 
     private setupAdminRoutes(config: APIConfig) {
-        this.app.use(`${adminPath}/*`, bearerAuth({
+        this.app.use(`${config.adminPrefix}/*`, bearerAuth({
             token: config.adminSecret
         }));
 
         const adminRouteHandler = admin;
 
         (config.adminRoutes ?? []).forEach(({path, route}) => {
-            if (path === adminPath) return;
+            if (path === config.adminPrefix) return;
             adminRouteHandler.route(path, route);
         });
 
-        this.app.route(adminPath, adminRouteHandler);
+        this.app.route(config.adminPrefix, adminRouteHandler);
     }
 
     private setupAPIRoutes(config: APIConfig) {

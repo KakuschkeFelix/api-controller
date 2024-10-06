@@ -5,6 +5,7 @@ import {bearerAuth} from 'hono/bearer-auth';
 import bcrypt from "bcrypt";
 import {APIKeysWrapper} from "../db/api-keys";
 import {jwt} from "hono/jwt";
+import {prometheus} from "@hono/prometheus";
 
 type APIConfig = {
     apiPrefix: string;
@@ -27,7 +28,10 @@ export class API {
 
     constructor(config: APIConfig) {
         this.app = new Hono();
+        const { printMetrics, registerMetrics } = prometheus()
         this.app.use(logger());
+        this.app.use('*', registerMetrics)
+        this.app.get('/metrics', printMetrics)
 
         this.setupAdminRoutes(config);
         this.setupAPIRoutes(config);

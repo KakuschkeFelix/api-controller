@@ -40,6 +40,7 @@ const api = new API({
             auth: 'NONE',
         }
     ],
+    adminPrefix: '/admin',
     adminSecret: process.env.ADMIN_SECRET!
 });
 
